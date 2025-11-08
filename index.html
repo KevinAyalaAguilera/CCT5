@@ -74,7 +74,7 @@
 
         // Modificar solo las filas que coincidan
         wb1.json.forEach(row => {
-          const pedido = String(row["Pedidos de ventas"]).trim();
+          const pedido = String(row["Pedido de ventas"]).trim();
           if (identificadores.has(pedido)) {
             row["Observaciones 2 (TMS/CDC)"] = "NO PLANIFICADO";
           }
@@ -105,5 +105,6 @@
   </script>
 </body>
 </html>
+
 
 
