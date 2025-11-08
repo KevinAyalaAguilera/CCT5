@@ -26,15 +26,17 @@
 </head>
 <body>
   <h1>Comparador de Excels</h1>
-  <p>Sube el primer Excel (principal) y luego el segundo Excel (referencia):</p>
+  <p>Sube el primer Excel (Preparación de las cargas) y luego el segundo Excel (Urbantz - Tareas no planificadas):</p>
 
-  <label>📘 Primer Excel (principal):</label><br>
+  <label>📘 Primer Excel (Preparación de las cargas):</label><br>
   <input type="file" id="file1" accept=".xlsx" /><br><br>
 
-  <label>📗 Segundo Excel (referencia):</label><br>
+  <label>📗 Segundo Excel (Urbantz - Tareas no planificadas):</label><br>
   <input type="file" id="file2" accept=".xlsx" /><br><br>
 
-  <button id="processBtn">Procesar y descargar</button>
+  <button id="processBtn">Procesar y descargar</button><br>
+
+    <label>Lleva al viejo Filtro de cargas el excel generado</label><br>
 
   <script>
     document.getElementById('processBtn').addEventListener('click', async () => {
@@ -101,3 +103,4 @@
   </script>
 </body>
 </html>
+
