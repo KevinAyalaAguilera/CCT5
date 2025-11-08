@@ -66,14 +66,16 @@
 
       try {
         const [wb1, wb2] = await Promise.all([readExcel(file1), readExcel(file2)]);
-        
-        // Obtener los valores de "Pedidos de ventas" del segundo Excel
-        const pedidosSet = new Set(wb2.json.map(row => String(row["Pedidos de ventas"]).trim()));
 
-        // Modificar el primer Excel
+        // Obtener los valores de "Identificador de tarea" del segundo Excel
+        const identificadores = new Set(
+          wb2.json.map(row => String(row["Identificador de tarea"]).trim()).filter(v => v)
+        );
+
+        // Modificar solo las filas que coincidan
         wb1.json.forEach(row => {
           const pedido = String(row["Pedidos de ventas"]).trim();
-          if (pedidosSet.has(pedido)) {
+          if (identificadores.has(pedido)) {
             row["Observaciones 2 (TMS/CDC)"] = "NO PLANIFICADO";
           }
         });
