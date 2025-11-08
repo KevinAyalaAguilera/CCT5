@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Comparador de Excels</title>
+  <script src="xlsx.full.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2em;
+      background: #fafafa;
+    }
+    h1 { color: #333; }
+    input[type="file"] { margin: 10px 0; }
+    button {
+      padding: 10px 20px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover { background: #0056b3; }
+  </style>
+</head>
+<body>
+  <h1>Comparador de Excels</h1>
+  <p>Sube el primer Excel (principal) y luego el segundo Excel (referencia):</p>
+
+  <label>📘 Primer Excel (principal):</label><br>
+  <input type="file" id="file1" accept=".xlsx" /><br><br>
+
+  <label>📗 Segundo Excel (referencia):</label><br>
+  <input type="file" id="file2" accept=".xlsx" /><br><br>
+
+  <button id="processBtn">Procesar y descargar</button>
+
+  <script>
+    document.getElementById('processBtn').addEventListener('click', async () => {
+      const file1 = document.getElementById('file1').files[0];
+      const file2 = document.getElementById('file2').files[0];
+
+      if (!file1 || !file2) {
+        alert('Por favor selecciona ambos archivos.');
+        return;
+      }
+
+      const readExcel = (file) => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const sheetName = workbook.SheetNames[0];
+            const sheet = workbook.Sheets[sheetName];
+            const json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+            resolve({ workbook, sheetName, sheet, json });
+          };
+          reader.onerror = reject;
+          reader.readAsArrayBuffer(file);
+        });
+      };
+
+      try {
+        const [wb1, wb2] = await Promise.all([readExcel(file1), readExcel(file2)]);
+        
+        // Obtener los valores de "Pedidos de ventas" del segundo Excel
+        const pedidosSet = new Set(wb2.json.map(row => String(row["Pedidos de ventas"]).trim()));
+
+        // Modificar el primer Excel
+        wb1.json.forEach(row => {
+          const pedido = String(row["Pedidos de ventas"]).trim();
+          if (pedidosSet.has(pedido)) {
+            row["Observaciones 2 (TMS/CDC)"] = "NO PLANIFICADO";
+          }
+        });
+
+        // Convertir de nuevo a hoja de Excel
+        const newSheet = XLSX.utils.json_to_sheet(wb1.json);
+        wb1.workbook.Sheets[wb1.sheetName] = newSheet;
+
+        // Crear archivo descargable
+        const wbout = XLSX.write(wb1.workbook, { bookType: 'xlsx', type: 'array' });
+        const blob = new Blob([wbout], { type: 'application/octet-stream' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'resultado_modificado.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+      } catch (err) {
+        console.error(err);
+        alert('Ocurrió un error al procesar los archivos.');
+      }
+    });
+  </script>
+</body>
+</html>
